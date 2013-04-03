@@ -941,6 +941,19 @@ class ElasticSearch(object):
             'GET', ['_cluster', 'state'], query_params=query_params)
 
 
+    def from_python(self, value):
+        """Convert more Python data types to ES-understandable JSON."""
+        iso = _iso_datetime(value)
+        if iso:
+            return iso
+        if not PY3 and isinstance(value, str):
+            return unicode(value, errors='replace')  # TODO: Be stricter.
+        if isinstance(value, set):
+            return list(value)
+
+        return value
+        # return super(JsonEncoder, self).default(value)
+
 class JsonEncoder(json.JSONEncoder):
     def default(self, value):
         """Convert more Python data types to ES-understandable JSON."""
